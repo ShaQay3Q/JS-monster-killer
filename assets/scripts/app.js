@@ -21,6 +21,8 @@ function attackHandler() {
 	if (currentMonsterHealth <= 0 && currentPlayerHealth <= 0) {
 		alert("You have a Draw!");
 	}
+	console.log(`monsterDamage: ${monsterDamage}`);
+	console.log(`playerDamage: ${palyerDamage}`);
 }
 
 attackBtn.addEventListener("click", attackHandler);
