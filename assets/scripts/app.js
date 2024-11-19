@@ -1,5 +1,7 @@
 const ATTACK_VALUE = 10;
+const STRONG_ATTACK_VALUE = 15;
 const MONSTER_ATTACK_VALUE = 14;
+const MONSTER_STRONG_ATTACK_VALUE = 19;
 
 let chosenMaxLife = 100;
 let currentMonsterHealth = chosenMaxLife;
@@ -7,22 +9,45 @@ let currentPlayerHealth = chosenMaxLife;
 
 adjustHealthBars(chosenMaxLife);
 
-function attackHandler() {
-	const monsterDamage = dealMonsterDamage(ATTACK_VALUE);
-	currentMonsterHealth -= monsterDamage;
-	const palyerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
-	currentPlayerHealth -= palyerDamage;
-	if (currentMonsterHealth <= 0 && currentPlayerHealth > 0) {
-		alert("You Won!");
+function endgameEvaluation(mHealth, pHealth) {
+	if (mHealth <= 0 && pHealth > 0) {
+		alert("Player Won!");
 	}
-	if (currentPlayerHealth <= 0 && currentMonsterHealth > 0) {
+	if (pHealth <= 0 && mHealth > 0) {
 		alert("Monster Won!");
 	}
-	if (currentMonsterHealth <= 0 && currentPlayerHealth <= 0) {
-		alert("You have a Draw!");
+	if (pHealth <= 0 && mHealth <= 0) {
+		alert("We Have a Draw!");
 	}
-	console.log(`monsterDamage: ${monsterDamage}`);
-	console.log(`playerDamage: ${palyerDamage}`);
+}
+
+function damageCalc(pAttackValue, mttackvalue) {
+	const monsterDamage = dealMonsterDamage(pAttackValue);
+	currentMonsterHealth -= monsterDamage;
+	const palyerDamage = dealPlayerDamage(mttackvalue);
+	currentPlayerHealth -= palyerDamage;
+
+	return [currentMonsterHealth, currentPlayerHealth];
+}
+
+function attackHandler() {
+	const attackResult = damageCalc(ATTACK_VALUE, STRONG_ATTACK_VALUE);
+	endgameEvaluation(attackResult[0], attackResult[1]);
+
+	console.log(`monsterDamage: ${attackResult[0]}`);
+	console.log(`playerDamage: ${attackResult[1]}`);
+}
+
+function strongAttackHandler() {
+	const attackResult = damageCalc(
+		STRONG_ATTACK_VALUE,
+		MONSTER_STRONG_ATTACK_VALUE
+	);
+	endgameEvaluation(attackResult[0], attackResult[1]);
+
+	console.log(`monsterDamage: ${attackResult[0]}`);
+	console.log(`playerDamage: ${attackResult[1]}`);
 }
 
 attackBtn.addEventListener("click", attackHandler);
+strongAttackBtn.addEventListener("click", strongAttackHandler);
