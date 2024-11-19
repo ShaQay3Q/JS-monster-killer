@@ -27,6 +27,7 @@ function dealPlayerDamage(damage) {
 }
 
 function increasePlayerHealth(healValue) {
+	// the + before playerHealthBar function as if using parseNumber()
 	playerHealthBar.value = +playerHealthBar.value + healValue;
 }
 
