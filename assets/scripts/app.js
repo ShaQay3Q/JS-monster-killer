@@ -9,6 +9,7 @@ let currentPlayerHealth = chosenMaxLife;
 
 adjustHealthBars(chosenMaxLife);
 
+// Determine the winner
 function endgameEvaluation(mHealth, pHealth) {
 	if (mHealth <= 0 && pHealth > 0) {
 		alert("Player Won!");
@@ -21,6 +22,7 @@ function endgameEvaluation(mHealth, pHealth) {
 	}
 }
 
+// Calculate the damage on Monster and Player
 function damageCalc(pAttackValue, mttackvalue) {
 	const monsterDamage = dealMonsterDamage(pAttackValue);
 	currentMonsterHealth -= monsterDamage;
@@ -30,6 +32,7 @@ function damageCalc(pAttackValue, mttackvalue) {
 	return [currentMonsterHealth, currentPlayerHealth];
 }
 
+// Handler for normal attacks
 function attackHandler() {
 	const attackResult = damageCalc(ATTACK_VALUE, STRONG_ATTACK_VALUE);
 	endgameEvaluation(attackResult[0], attackResult[1]);
@@ -38,6 +41,7 @@ function attackHandler() {
 	console.log(`playerDamage: ${attackResult[1]}`);
 }
 
+// Handler for strong attacks
 function strongAttackHandler() {
 	const attackResult = damageCalc(
 		STRONG_ATTACK_VALUE,
@@ -49,5 +53,43 @@ function strongAttackHandler() {
 	console.log(`playerDamage: ${attackResult[1]}`);
 }
 
-attackBtn.addEventListener("click", attackHandler);
-strongAttackBtn.addEventListener("click", strongAttackHandler);
+// Halder for both type of attacks
+function generalAttackHandler(nAttack, sAttack) {
+	const attackResult = damageCalc(nAttack, sAttack);
+	endgameEvaluation(attackResult[0], attackResult[1]);
+
+	console.log(`monsterDamage: ${attackResult[0]}`);
+	console.log(`playerDamage: ${attackResult[1]}`);
+}
+
+// Get attack modes (normal, strong) and pass them to attack handler
+function attack(mode) {
+	let maxDamageOnMonster;
+	let maxDamageOnPlayer;
+
+	if (mode === "ATTACK") {
+		maxDamageOnMonster = ATTACK_VALUE;
+		maxDamageOnPlayer = MONSTER_ATTACK_VALUE;
+	}
+	if (mode === "STRON_ATTACK") {
+		maxDamageOnMonster = STRONG_ATTACK_VALUE;
+		maxDamageOnPlayer = MONSTER_STRONG_ATTACK_VALUE;
+	}
+	console.log(`maxDamageOnMonster: ${maxDamageOnMonster}`);
+	console.log(`maxDamageOnPlayer: ${maxDamageOnPlayer}`);
+
+	generalAttackHandler(maxDamageOnMonster, maxDamageOnPlayer);
+}
+
+function onClickAttack() {
+	attack("ATTACK");
+}
+
+function onClickStrongAttack() {
+	attack("STRON_ATTACK");
+}
+
+// attackBtn.addEventListener("click", attackHandler);
+attackBtn.addEventListener("click", onClickAttack);
+// strongAttackBtn.addEventListener("click", strongAttackHandler);
+strongAttackBtn.addEventListener("click", onClickStrongAttack);
