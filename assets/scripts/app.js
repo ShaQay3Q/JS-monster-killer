@@ -7,11 +7,19 @@ const HEAL_VALUE = 20;
 let chosenMaxLife = 100;
 let currentMonsterHealth = chosenMaxLife;
 let currentPlayerHealth = chosenMaxLife;
+let hasBonusLife = true;
 
 adjustHealthBars(chosenMaxLife);
 
 // Determine the winner
 function endgameEvaluation(mHealth, pHealth) {
+	const initialPH = currentPlayerHealth;
+
+	if (currentPlayerHealth <= 0 && bonusLifeEl) {
+		hasBonusLife = false;
+		removeBonusLife();
+		currentPlayerHealth = initialPH;
+	}
 	if (mHealth <= 0 && pHealth > 0) {
 		alert("Player Won!");
 	}
@@ -23,16 +31,39 @@ function endgameEvaluation(mHealth, pHealth) {
 	}
 }
 
+// function monsterAttack() {
+// 	const monsterDamage = dealMonsterDamage(0);
+// 	console.log(`monsterDamage: ${monsterDamage}`);
+// 	currentMonsterHealth -= monsterDamage;
+// 	const palyerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
+// 	console.log(`playerDamage: ${palyerDamage}`);
+// 	console.log(`playerHealth01: ${currentPlayerHealth}`);
+// 	currentPlayerHealth = currentMonsterHealth - palyerDamage + HEAL_VALUE;
+// 	setPlayerHealth(currentPlayerHealth);
+// 	console.log(`playerHealth02: ${currentPlayerHealth}`);
+// 	endgameEvaluation(currentMonsterHealth, currentPlayerHealth);
+// }
+
 function monsterAttack() {
-	const monsterDamage = dealMonsterDamage(0);
-	console.log(`monsterDamage: ${monsterDamage}`);
+	// Deal damage to the monster
+	const monsterDamage = dealMonsterDamage(MONSTER_ATTACK_VALUE);
+	console.log(`Monster dealt damage: ${monsterDamage}`);
 	currentMonsterHealth -= monsterDamage;
-	const palyerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
-	console.log(`playerDamage: ${palyerDamage}`);
-	console.log(`playerHealth01: ${currentPlayerHealth}`);
-	currentPlayerHealth = currentMonsterHealth - palyerDamage + HEAL_VALUE;
-	setPlayerHealth(currentPlayerHealth);
-	console.log(`playerHealth02: ${currentPlayerHealth}`);
+
+	// Deal damage to the player
+	const playerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
+	console.log(`Player received damage: ${playerDamage}`);
+	currentPlayerHealth -= playerDamage;
+
+	// Check if the player has bonus life and handle the scenario where the player might have bonus life
+	if (currentPlayerHealth <= 0 && hasBonusLife) {
+		hasBonusLife = false;
+		removeBonusLife(); // Remove the bonus life element
+		currentPlayerHealth = chosenMaxLife; // Reset player health after bonus life is used
+		alert("You would be dead, but the bonus life saved you!");
+	}
+
+	// Call the function to evaluate the endgame
 	endgameEvaluation(currentMonsterHealth, currentPlayerHealth);
 }
 
@@ -43,6 +74,13 @@ function endRound() {
 	// console.log(`playerDamage: ${palyerDamage}`);
 	currentPlayerHealth -= playerDamae;
 	// console.log(`playerHealth01: ${currentPlayerHealth}`);
+	if (currentPlayerHealth <= 0 && bonusLifeEl) {
+		hasBonusLife = false;
+		removeBonusLife();
+		currentPlayerHealth = initialPH;
+		alert("You would be dead, but the bonus life saved you!");
+		setPlayerHealth(initialPH);
+	}
 	if (currentMonsterHealth <= 0 && currentPlayerHealth > 0) {
 		alert("Player Won!");
 	}
@@ -127,19 +165,22 @@ strongAttackBtn.addEventListener("click", onClickStrongAttack);
 
 function healPlayerHander() {
 	let healValue;
-	if (currentPlayerHealth >= chosenMaxLife - HEAL_VALUE) {
-		alert("You can't heal more than your max initial health!");
-		healValue = chosenMaxLife - currentPlayerHealth;
-	} else {
-		healValue = HEAL_VALUE;
+
+	if (bonusLifeEl.innerHTML) {
+		if (currentPlayerHealth >= chosenMaxLife - HEAL_VALUE) {
+			alert("You can't heal more than your max initial health!");
+			healValue = chosenMaxLife - currentPlayerHealth;
+		} else {
+			healValue = HEAL_VALUE;
+		}
+		// playerHealthBar.value = Number(playerHealthBar.value) + HEAL_VALUE;
+		increasePlayerHealth(healValue);
+		currentPlayerHealth += healValue;
+		endRound();
+		// attackMonster();
+		monsterAttack();
+		removeBonusLife();
 	}
-	// playerHealthBar.value = Number(playerHealthBar.value) + HEAL_VALUE;
-	increasePlayerHealth(healValue);
-	currentPlayerHealth += healValue;
-	endRound();
-	// attackMonster();
-	// monsterAttack();
-	removeBonusLife();
 }
 
 healBtn.addEventListener("click", healPlayerHander);

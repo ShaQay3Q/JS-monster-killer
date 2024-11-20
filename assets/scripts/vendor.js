@@ -14,6 +14,20 @@ function adjustHealthBars(maxLife) {
 	playerHealthBar.value = maxLife;
 }
 
+// // Function to deal damage to the player
+// function dealPlayerDamage(damage) {
+// 	// Calculate player damage (e.g., based on player's stats or random factor)
+// 	const playerDamage = Math.max(0, damage); // Ensure no negative damage
+// 	return playerDamage;
+// }
+
+// // Function to deal damage to the monster
+// function dealMonsterDamage(damage) {
+// 	// Calculate monster damage (e.g., based on monster's attack power)
+// 	const monsterDamage = Math.max(0, damage); // Ensure no negative damage
+// 	return monsterDamage;
+// }
+
 function dealMonsterDamage(damage) {
 	const dealtDamage = Math.random() * damage;
 	monsterHealthBar.value = +monsterHealthBar.value - dealtDamage;
