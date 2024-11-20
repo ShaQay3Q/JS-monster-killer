@@ -23,6 +23,36 @@ function endgameEvaluation(mHealth, pHealth) {
 	}
 }
 
+function monsterAttack() {
+	const monsterDamage = dealMonsterDamage(0);
+	console.log(`monsterDamage: ${monsterDamage}`);
+	currentMonsterHealth -= monsterDamage;
+	const palyerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
+	console.log(`playerDamage: ${palyerDamage}`);
+	console.log(`playerHealth01: ${currentPlayerHealth}`);
+	currentPlayerHealth = currentMonsterHealth - palyerDamage + HEAL_VALUE;
+	setPlayerHealth(currentPlayerHealth);
+	console.log(`playerHealth02: ${currentPlayerHealth}`);
+	endgameEvaluation(currentMonsterHealth, currentPlayerHealth);
+}
+
+function endRound() {
+	// console.log(`monsterDamage: ${damage}`);
+	// console.log(`monsterHealth: ${currentMonsterHealth}`);
+	const playerDamae = dealPlayerDamage(ATTACK_VALUE);
+	// console.log(`playerDamage: ${palyerDamage}`);
+	currentPlayerHealth -= playerDamae;
+	// console.log(`playerHealth01: ${currentPlayerHealth}`);
+	if (currentMonsterHealth <= 0 && currentPlayerHealth > 0) {
+		alert("Player Won!");
+	}
+	if (currentPlayerHealth <= 0 && currentMonsterHealth > 0) {
+		alert("Monster Won!");
+	}
+	if (currentMonsterHealth <= 0 && currentPlayerHealth <= 0) {
+		alert("Have a Draw!");
+	}
+}
 // Calculate the damage on Monster and Player
 function damageCalc(pAttackValue, mttackvalue) {
 	const monsterDamage = dealMonsterDamage(pAttackValue);
@@ -55,8 +85,8 @@ function strongAttackHandler() {
 }
 
 // Halder for both type of attacks
-function generalAttackHandler(nAttack, sAttack) {
-	const attackResult = damageCalc(nAttack, sAttack);
+function generalAttackHandler(pAttack, mAttack) {
+	const attackResult = damageCalc(pAttack, mAttack);
 	endgameEvaluation(attackResult[0], attackResult[1]);
 
 	console.log(`monsterDamage: ${attackResult[0]}`);
@@ -96,8 +126,20 @@ attackBtn.addEventListener("click", onClickAttack);
 strongAttackBtn.addEventListener("click", onClickStrongAttack);
 
 function healPlayerHander() {
-	currentHealth = playerHealthBar.value;
-	playerHealthBar.value = currentMonsterHealth + HEAL_VALUE;
+	let healValue;
+	if (currentPlayerHealth >= chosenMaxLife - HEAL_VALUE) {
+		alert("You can't heal more than your max initial health!");
+		healValue = chosenMaxLife - currentPlayerHealth;
+	} else {
+		healValue = HEAL_VALUE;
+	}
+	// playerHealthBar.value = Number(playerHealthBar.value) + HEAL_VALUE;
+	increasePlayerHealth(healValue);
+	currentPlayerHealth += healValue;
+	endRound();
+	// attackMonster();
+	// monsterAttack();
+	removeBonusLife();
 }
 
 healBtn.addEventListener("click", healPlayerHander);
