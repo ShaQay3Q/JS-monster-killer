@@ -8,7 +8,7 @@ const MODE_STRONG_ATTACK = "STRONG_ATTACK"; // or MODE_STRONG_ATTACK = 1
 const LOG_EVENT_PLAYER_ATTACK = "PLAYER_ATTACK";
 const LOG_EVENT_MONSTER_ATTACK = "MONSTER_ATTACK";
 const LOG_EVENT_PLAYER_STRONG_ATTACK = "PLAYER_STRONG_ATTACK";
-const LOG_EVENT_MONSTR_STRONG_ATTACK = "MONSTER_STRONG_ATTACK";
+const LOG_EVENT_MONSTER_STRONG_ATTACK = "MONSTER_STRONG_ATTACK";
 const LOG_EVENT_HEAL = "HEAL";
 const LOG_EVENT_GAMEOVER = "GAME_OVER";
 const PLAYER = "PLAYER";
@@ -52,42 +52,48 @@ function endgameEvaluation(mHealth, pHealth) {
 	if (pHealth <= 0 || mHealth <= 0) {
 		reset();
 	}
-	writeToLog02(LOG_EVENT_GAMEOVER, playerDamage, monsterHealth, playerHealth);
+	writeToLog02(
+		LOG_EVENT_GAMEOVER,
+		null,
+		currentMonsterHealth,
+		currentPlayerHealth
+	);
 }
 
 function monsterAttack() {
-	// Deal damage to the monster
+	// Monster attacks
 	const monsterDamage = dealMonsterDamage(MONSTER_ATTACK_VALUE);
-	// console.log(`Monster dealt damage: ${monsterDamage}`);
 	currentMonsterHealth -= monsterDamage;
+
+	// Player counterattacks
+	const playerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
+	currentPlayerHealth -= playerDamage;
+
+	// Bonus life handling
+	if (currentPlayerHealth <= 0 && hasBonusLife) {
+		hasBonusLife = false;
+		removeBonusLife();
+		currentPlayerHealth = chosenMaxLife;
+		alert("You would be dead, but the bonus life saved you!");
+		setPlayerHealth(currentPlayerHealth);
+	}
+
+	// Evaluate endgame
+	endgameEvaluation(currentMonsterHealth, currentPlayerHealth);
+
+	// Log attacks
 	writeToLog02(
 		LOG_EVENT_PLAYER_ATTACK,
-		playerDamage,
-		monsterHealth,
-		playerHealth
+		monsterDamage,
+		currentMonsterHealth,
+		currentPlayerHealth
 	);
-
-	// Deal damage to the player
-	const playerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
-	// console.log(`Player received damage: ${playerDamage}`);
-	currentPlayerHealth -= playerDamage;
 	writeToLog02(
 		LOG_EVENT_MONSTER_ATTACK,
 		playerDamage,
-		monsterHealth,
-		playerHealth
+		currentMonsterHealth,
+		currentPlayerHealth
 	);
-
-	// Check if the player has bonus life and handle the scenario where the player might have bonus life
-	if (currentPlayerHealth <= 0 && hasBonusLife) {
-		hasBonusLife = false;
-		removeBonusLife(); // Remove the bonus life element
-		currentPlayerHealth = chosenMaxLife; // Reset player health after bonus life is used
-		alert("You would be dead, but the bonus life saved you!");
-	}
-
-	// Call the function to evaluate the endgame
-	endgameEvaluation(currentMonsterHealth, currentPlayerHealth);
 }
 
 function endRound() {
@@ -150,12 +156,37 @@ function strongAttackHandler() {
 }
 
 // Halder for both type of attacks
-function generalAttackHandler(pAttack, mAttack) {
-	const attackResult = damageCalc(pAttack, mAttack);
-	endgameEvaluation(attackResult[0], attackResult[1]);
+// function generalAttackHandler(pAttack, mAttack) {
+// 	const attackResult = damageCalc(pAttack, mAttack);
+// 	endgameEvaluation(attackResult[0], attackResult[1]);
 
-	console.log(`monsterDamage: ${attackResult[0]}`);
-	console.log(`playerDamage: ${attackResult[1]}`);
+// 	console.log(`monsterDamage: ${attackResult[0]}`);
+// 	console.log(`playerDamage: ${attackResult[1]}`);
+// }
+
+function generalAttackHandler(playerAttackValue, monsterAttackValue) {
+	const monsterDamage = dealMonsterDamage(playerAttackValue);
+	const playerDamage = dealPlayerDamage(monsterAttackValue);
+
+	currentMonsterHealth -= monsterDamage;
+	currentPlayerHealth -= playerDamage;
+
+	// Evaluate the game state
+	endgameEvaluation(currentMonsterHealth, currentPlayerHealth);
+
+	// Log attacks
+	writeToLog02(
+		LOG_EVENT_PLAYER_ATTACK,
+		monsterDamage,
+		currentMonsterHealth,
+		currentPlayerHealth
+	);
+	writeToLog02(
+		LOG_EVENT_MONSTER_ATTACK,
+		playerDamage,
+		currentMonsterHealth,
+		currentPlayerHealth
+	);
 }
 
 // Get attack modes (normal, strong) and pass them to attack handler
@@ -177,13 +208,14 @@ function attack(mode) {
 	generalAttackHandler(maxDamageOnMonster, maxDamageOnPlayer);
 }
 
+// OR use in the condition
 function writeToLog01(event, value, monsterHealth, playerHealth) {
 	if (
 		event ===
 		(LOG_EVENT_PLAYER_ATTACK ||
 			LOG_EVENT_MONSTER_ATTACK ||
 			LOG_EVENT_PLAYER_STRONG_ATTACK ||
-			LOG_EVENT_MONSTR_STRONG_ATTACK ||
+			LOG_EVENT_MONSTER_STRONG_ATTACK ||
 			LOG_EVENT_HEAL ||
 			LOG_EVENT_GAMEOVER)
 	) {
@@ -197,64 +229,50 @@ function writeToLog01(event, value, monsterHealth, playerHealth) {
 	}
 }
 
+// !Another implementation
+function writeToLog03(event, value, monsterHealth, playerHealth) {
+	if (
+		[
+			LOG_EVENT_PLAYER_ATTACK,
+			LOG_EVENT_MONSTER_ATTACK,
+			LOG_EVENT_PLAYER_STRONG_ATTACK,
+			LOG_EVENT_MONSTER_STRONG_ATTACK,
+			LOG_EVENT_HEAL,
+			LOG_EVENT_GAMEOVER,
+		].includes(event)
+	) {
+		const logEntry = {
+			event,
+			value,
+			finalMonsterHealth: monsterHealth,
+			finalPlayerHealth: playerHealth,
+		};
+		battleLog.push(logEntry);
+	}
+}
+
 function writeToLog02(event, value, monsterHealth, playerHealth) {
 	logEntry = {
 		event: event,
 		value: value,
 		finalMonsterHealth: monsterHealth,
 		finalPlayerHealth: playerHealth,
+		target: event.includes("MONSTER") ? PLAYER : MONSTER,
 	};
-	if (event === LOG_EVENT_PLAYER_ATTACK) {
-		logEntry.target = MONSTER;
+
+	if (event === LOG_EVENT_HEAL || event === LOG_EVENT_GAMEOVER) {
+		event = "";
 	}
-	if (event === LOG_EVENT_MONSTER_ATTACK) {
-		logEntry.target = PLAYER;
-	}
-	if (event === LOG_EVENT_PLAYER_STRONG_ATTACK) {
-		logEntry.target = MONSTER;
-	}
-	if (event === LOG_EVENT_MONSTR_STRONG_ATTACK) {
-		logEntry.target = PLAYER;
-	}
-	if (event === LOG_EVENT_HEAL) {
-		logEntry.target = PLAYER;
-	}
-	if (event === LOG_EVENT_GAMEOVER) {
-		logEntry.target = "";
-	}
+
 	battleLog.push(logEntry);
 }
 
 function onClickAttack() {
 	attack(MODE_ATTACK);
-	writeToLog02(
-		LOG_EVENT_MONSTER_ATTACK,
-		MODE_STRONG_ATTACK,
-		monsterHealth,
-		playerHealth
-	);
-	writeToLog02(
-		LOG_EVENT_PLAYER_ATTACK,
-		MODE_STRONG_ATTACK,
-		monsterHealth,
-		playerHealth
-	);
 }
 
 function onClickStrongAttack() {
 	attack(MODE_STRONG_ATTACK);
-	writeToLog02(
-		LOG_EVENT_PLAYER_STRONG_ATTACK,
-		MODE_STRONG_ATTACK,
-		monsterHealth,
-		playerHealth
-	);
-	writeToLog02(
-		LOG_EVENT_MONSTER_STRONG_ATTACK,
-		MODE_STRONG_ATTACK,
-		monsterHealth,
-		playerHealth
-	);
 }
 
 // attackBtn.addEventListener("click", attackHandler);
