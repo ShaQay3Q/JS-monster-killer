@@ -4,10 +4,19 @@ const MONSTER_ATTACK_VALUE = 14;
 const MONSTER_STRONG_ATTACK_VALUE = 19;
 const HEAL_VALUE = 20;
 
-let chosenMaxLife = 100;
+let chosenMaxLife = Number(prompt("Maximum life for the game: ", "100"));
+while (isNaN(chosenMaxLife) || chosenMaxLife <= 0) {
+	chosenMaxLife = +prompt("Maximum life for the game: ", "100");
+}
 let currentMonsterHealth = chosenMaxLife;
 let currentPlayerHealth = chosenMaxLife;
 let hasBonusLife = true;
+
+function reset() {
+	currentMonsterHealth = chosenMaxLife;
+	currentPlayerHealth = chosenMaxLife;
+	resetGame(chosenMaxLife);
+}
 
 adjustHealthBars(chosenMaxLife);
 
@@ -29,20 +38,10 @@ function endgameEvaluation(mHealth, pHealth) {
 	if (pHealth <= 0 && mHealth <= 0) {
 		alert("We Have a Draw!");
 	}
+	if (pHealth <= 0 || mHealth <= 0) {
+		reset();
+	}
 }
-
-// function monsterAttack() {
-// 	const monsterDamage = dealMonsterDamage(0);
-// 	console.log(`monsterDamage: ${monsterDamage}`);
-// 	currentMonsterHealth -= monsterDamage;
-// 	const palyerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
-// 	console.log(`playerDamage: ${palyerDamage}`);
-// 	console.log(`playerHealth01: ${currentPlayerHealth}`);
-// 	currentPlayerHealth = currentMonsterHealth - palyerDamage + HEAL_VALUE;
-// 	setPlayerHealth(currentPlayerHealth);
-// 	console.log(`playerHealth02: ${currentPlayerHealth}`);
-// 	endgameEvaluation(currentMonsterHealth, currentPlayerHealth);
-// }
 
 function monsterAttack() {
 	// Deal damage to the monster
@@ -83,12 +82,15 @@ function endRound() {
 	}
 	if (currentMonsterHealth <= 0 && currentPlayerHealth > 0) {
 		alert("Player Won!");
+		reset();
 	}
 	if (currentPlayerHealth <= 0 && currentMonsterHealth > 0) {
 		alert("Monster Won!");
+		reset();
 	}
 	if (currentMonsterHealth <= 0 && currentPlayerHealth <= 0) {
 		alert("Have a Draw!");
+		reset();
 	}
 }
 // Calculate the damage on Monster and Player
