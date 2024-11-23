@@ -3,6 +3,8 @@ const STRONG_ATTACK_VALUE = 15;
 const MONSTER_ATTACK_VALUE = 14;
 const MONSTER_STRONG_ATTACK_VALUE = 19;
 const HEAL_VALUE = 20;
+const MODE_ATTACK = "ATTACK"; // or MODE_ATTACK = 0
+const MODE_STRONG_ATTACK = "STRONG_ATTACK"; // or MODE_STRONG_ATTACK = 1
 
 let chosenMaxLife = Number(prompt("Maximum life for the game: ", "100"));
 while (isNaN(chosenMaxLife) || chosenMaxLife <= 0) {
@@ -138,11 +140,11 @@ function attack(mode) {
 	let maxDamageOnMonster;
 	let maxDamageOnPlayer;
 
-	if (mode === "ATTACK") {
+	if (mode === MODE_ATTACK) {
 		maxDamageOnMonster = ATTACK_VALUE;
 		maxDamageOnPlayer = MONSTER_ATTACK_VALUE;
 	}
-	if (mode === "STRON_ATTACK") {
+	if (mode === MODE_STRONG_ATTACK) {
 		maxDamageOnMonster = STRONG_ATTACK_VALUE;
 		maxDamageOnPlayer = MONSTER_STRONG_ATTACK_VALUE;
 	}
@@ -153,11 +155,11 @@ function attack(mode) {
 }
 
 function onClickAttack() {
-	attack("ATTACK");
+	attack(MODE_ATTACK);
 }
 
 function onClickStrongAttack() {
-	attack("STRON_ATTACK");
+	attack(MODE_STRONG_ATTACK);
 }
 
 // attackBtn.addEventListener("click", attackHandler);
