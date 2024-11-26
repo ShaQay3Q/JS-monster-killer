@@ -309,8 +309,23 @@ function healPlayerHander() {
 }
 
 function printLogHandler() {
-	console.log("battleLog:");
-	console.log(battleLog);
+	// for (let i = 0; i < battleLog.length; i++) {
+	// 	console.log("--------- ");
+	// }
+	// for (let i = 10; i > 0; i--) {
+	// 	console.log(i);
+	// }
+	//! for-of itterates over an array and gets the elements one by one
+	for (const e of battleLog) {
+		console.log(e);
+		//! for-in itterates over an objects and get the keys one by one
+		for (const k in logEntry) {
+			// console.log(k);
+			console.log(`${k}: ${logEntry[k]}`);
+		}
+	}
+	// console.log("battleLog:");
+	// console.log(battleLog);
 }
 
 healBtn.addEventListener("click", healPlayerHander);
