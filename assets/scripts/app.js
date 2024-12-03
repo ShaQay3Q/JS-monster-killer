@@ -14,14 +14,43 @@ const LOG_EVENT_GAMEOVER = "GAME_OVER";
 const PLAYER = "PLAYER";
 const MONSTER = "MONSTER";
 
-let chosenMaxLife = Number(prompt("Maximum life for the game: ", "100"));
-while (isNaN(chosenMaxLife) || chosenMaxLife <= 0) {
-	chosenMaxLife = +prompt("Maximum life for the game: ", "100");
+// let chosenMaxLife = Number(prompt("Maximum life for the game: ", "100"));
+// while (isNaN(chosenMaxLife) || chosenMaxLife <= 0) {
+// 	chosenMaxLife = +prompt("Maximum life for the game: ", "100");
+// }
+
+function getMaxLifeValue() {
+	const parsedValue = parseInt(prompt("Maximum life for the game: ", "100"));
+	if (isNaN(parsedValue) || parsedValue <= 0) {
+		// can throw anything as error, number, string, object....
+		//! most errores are objects with message property
+		//! it stops script execution - CRASH
+		throw {
+			message: "Invalid user input, not a number",
+		};
+	}
+	return parsedValue;
 }
+let chosenMaxLife;
+
+try {
+	chosenMaxLife = getMaxLifeValue();
+} catch (error) {
+	console.log(error);
+	//! Fallback logic
+	chosenMaxLife = 100;
+	alert("You entered something wrone, defaul value of 100 was used.");
+} finally {
+	//! This can be with or without CATCH.
+	//! It always execute regardless whether there is an error or not!
+	// Cna be used to do any clean-up work
+}
+
 let currentMonsterHealth = chosenMaxLife;
 let currentPlayerHealth = chosenMaxLife;
 let hasBonusLife = true;
 let battleLog = [];
+let lastLoggedEntry = 0;
 
 function reset() {
 	currentMonsterHealth = chosenMaxLife;
@@ -315,15 +344,34 @@ function printLogHandler() {
 	// for (let i = 10; i > 0; i--) {
 	// 	console.log(i);
 	// }
-	//! for-of itterates over an array and gets the elements one by one
-	for (const e of battleLog) {
-		console.log(e);
-		//! for-in itterates over an objects and get the keys one by one
-		for (const k in logEntry) {
-			// console.log(k);
-			console.log(`${k}: ${logEntry[k]}`);
+	// //! for-of itterates over an array and gets the elements one by one
+	// let i = 0; //! becaus eif for of loop there is no access to index number, this will provide the index number
+	// for (const e of battleLog) {
+	// 	console.log(e);
+	// 	//! for-in itterates over an objects and get the keys one by one
+	// 	for (const k in logEntry) {
+	// 		// console.log(k);
+	// 		console.log(`${k}: ${logEntry[k]}`);
+	// 	}
+	// }
+	console.log("-----");
+	let i = 0;
+	for (const logEntry of battleLog) {
+		if ((!lastLoggedEntry && lastLoggedEntry !== 0) || lastLoggedEntry < i) {
+			console.log(`${i}`);
+			for (const key in logEntry) {
+				console.log(`${key}: ${logEntry[key]}`);
+			}
+			lastLoggedEntry = i;
 		}
+		i++;
+		break;
+
+		// for (let a; a < l; a++) {
+		// 	console.log(`log: ${battleLog[i]}`);
+		// }
 	}
+
 	// console.log("battleLog:");
 	// console.log(battleLog);
 }
